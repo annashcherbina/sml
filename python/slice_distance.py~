@@ -1,3 +1,0 @@
-data=open("/users/annashch/vcfchunks/full",'r').read().split('\n') 
-while '' in data: 
-    data.remove('') 
