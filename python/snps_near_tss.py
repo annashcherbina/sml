@@ -51,6 +51,7 @@ def main():
                 continue 
             best_dist=dist+1 
             closest_gene=None 
+            best_meta=None 
             for b in all_bins: 
                 if b not in tss_pos[chrom]: 
                     continue 
@@ -59,8 +60,9 @@ def main():
                     if abs(c-pos)< best_dist: 
                         best_dist=abs(c-pos) 
                         closest_gene=c 
+                        best_meta=candidates[closest_gene] 
             if best_dist < dist: 
-                outf.write('\t'.join(candidates[closest_gene])+'\t'+str(best_dist)+'\t'+line+'\n') 
+                outf.write('\t'.join(best_meta)+'\t'+str(best_dist)+'\t'+line+'\n') 
 
 if __name__=="__main__": 
     main() 
