@@ -1,7 +1,7 @@
 #ADDS MOTIF INFORMATION FOR SNP ANNOTATION 
 motifs=open('/users/annashch/CEUfamily.MOTIFS.flattened.txt','r').read().split('\n') 
 if '' in motifs: 
-    motif.remove('')
+    motifs.remove('')
 motif_dict=dict() 
 for line in motifs: 
     tokens=line.split('\t') 
@@ -15,7 +15,9 @@ for line in motifs:
 data=open('/users/annashch/vcfchunks/CONSERVED.MAF.DNAse.TF.splice.full','r').read().split('\n') 
 while '' in data: 
     data.remove('') 
-outf=open('/users/annashch/vcfchunks/motifs.CONSERVED.MAF.DNAse.TF.splice.full','w').read().split('\n') 
+header=data[0] 
+outf=open('/users/annashch/vcfchunks/motifs.CONSERVED.MAF.DNAse.TF.splice.full','w')
+outf.write('MOTIF\t'+header+'\n') 
 for line in data[1::]: 
     tokens=line.split('\t') 
     chrom=tokens[11]
