@@ -25,13 +25,16 @@ for line in gtf:
 print "build dictionary of exon ends" 
 outf=open("/users/annashch/vcfchunks/splice.full","w")
 header=data[0] 
+header_parts=header.split('\t') 
+chrom_index=header_parts.index("CHROM") 
+pos_index=header_parts.index("POS") 
 outf.write('SpliceDistance\t'+header+'\n') 
 for line in data[1::]: 
     tokens=line.split('\t')
     #print str(tokens) 
-    chrom=tokens[5] 
+    chrom=tokens[chrom_index] 
     try:
-        pos=int(tokens[6])
+        pos=int(tokens[pos_index])
     except: 
         continue 
     #print "chrom:"+str(chrom) 

@@ -1,7 +1,7 @@
 import sys 
 from helpers import * 
-start_pos=int(sys.argv[1]) 
-end_pos=int(sys.argv[2]) 
+#start_pos=int(sys.argv[1]) 
+#end_pos=int(sys.argv[2]) 
 #GROUP BY MAF & PROPORTION OF FAMILY EFFECT  > POPULATION  
 data=open('/users/annashch/vcfchunks/NOMAJOR.motifs.CONSERVED.MAF.DNAse.TF.splice.full','r').read().split('\n') 
 #data=open('NOMAJOR.motifs.CONSERVED.MAF.DNAse.TF.splice.full','r').read().split('\n')
@@ -14,13 +14,13 @@ print "Read in source data"
 terms=['dnase','tf','splice50','splice30','tss','phylop1','phylop2','cadd10','motif']
 special=build_categories(terms)
 for key in special:
-    for binnum in range(7):
+    for binnum in range(5):
         special[key][binnum]=[0,0]
 print "set up summary dict"
 
 beta_pop_cutoff=95 
 cl=0 
-for line in data[start_pos:end_pos]: 
+for line in data[int(sys.argv[1]):int(sys.argv[2])]: 
     cl+=1 
     if cl%10000==0: 
         print str(cl) 
@@ -48,7 +48,7 @@ for line in data[start_pos:end_pos]:
     tss_dist=int(tokens[11])
     
     beta_pop=float(tokens[10]) 
-    if beta_pop > beta_pop_cutoff: 
+    if beta_pop >= beta_pop_cutoff: 
         beta_add=1
     else: 
         beta_add=0 
@@ -72,7 +72,7 @@ for line in data[start_pos:end_pos]:
         matches.append('splice30')
     if tss_dist <5000:
         matches.append('tss')
-    print str(matches) 
+    #print str(matches) 
     for key in special:
         hasall=True
         for group in key:
@@ -83,25 +83,33 @@ for line in data[start_pos:end_pos]:
             special[key][maf_bin][0]+=beta_add
             special[key][maf_bin][1]+=1
 #print str(special) 
-
-outf=open('/users/annashch/summary/summary.tsv'+"_"+str(start_pos)+"_"+str(end_pos),'w')
-#outf=open('summary.tsv','w') 
-outf.write('Factor1\tFactor2\tFactor3\tFactor4\tFactor5\tFactor6\tFactor7\tFactor8\tFactor9\tMAF_0_.05\tMAF_.05_.10\tMAF_.10_.15\tMAF_.15_.20\tMAF.20_\tMAF_NA\n')
+print "writing output file:"
+outf=open('/users/annashch/summary/summary.tsv','w')
+categories=['dnase','tf','splice50','splice30','tss','phylop1','phylop2','cadd10','motif']
+categories.sort() 
+header='NumAnnotations\t'+'\t'.join(categories) +'\tMAF<0.01_Total\tMAF<0.01_Sig\tMAF<0.01_Prop\tMAF_0.01_0.05_Total\tMAF_0.01_0.05_Sig\tMAF_0.01_0.05_Prop\t'
+header=header+'MAF_0.05_0.20_Total\tMAF_0.05_0.20_Sig\tMAF_0.05_0.20_Prop\t'
+header=header+'MAF_>0.20_Total\tMAF_>0.20_Sig\tMAF_>0.20_Prop\t'
+header=header+'MAF_NA_Total\tMAF_NA_Sig\tMAF_NA_Prop\t'
+outf.write(header+'\n') 
 
 #SUMMARIZE THE RESULTS!
 for key in special:
-    #key=list(key)
-    for i in range(9):
-        if i<len(key):
-            outf.write(key[i]+'\t')
-        else:
-            outf.write('\t') 
-    for binval in range(7):
-        if special[key][binval][1]==0:
-            fract="NA"
-            outf.write('\tNA')
+    print str(key) 
+    numentries=len(key) 
+    outf.write(str(numentries)) 
+    for c in categories: 
+        if c in key: 
+            outf.write('\t1') 
         else: 
-            fract=special[key][binval][0]/float(special[key][binval][1])
-            outf.write('\t'+str(round(fract,3)))
+            outf.write('\t0') 
+    for binval in range(5):
+        totalval=special[key][binval][1] 
+        sigval=special[key][binval][0] 
+        if totalval==0: 
+            prop=0
+        else: 
+            prop=float(sigval)/totalval 
+        outf.write('\t'+str(totalval)+'\t'+str(sigval)+'\t'+str(prop))
     outf.write('\n')
     

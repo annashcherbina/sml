@@ -40,16 +40,19 @@ data=open("/users/annashch/vcfchunks/splice.full",'r').read().split('\n')
 while '' in data: 
     data.remove('') 
 print 'read in splice data' 
-outf=open('DNAse.TF.splice.full','w') 
+outf=open('/users/annashch/vcfchunks/DNAse.TF.splice.full','w') 
 outf.write('DNAse\tTF\t'+data[0]+'\n') 
+header=data[0].split('\t') 
+chrom_index=header.index("CHROM") 
+pos_index=header.index("POS") 
 countval=0 
 for line in data[1::]: 
     countval+=1 
     if countval%1000==0: 
         print str(countval) 
     tokens=line.split('\t') 
-    chrom=tokens[6]
-    base=int(tokens[7]) 
+    chrom=tokens[chrom_index]
+    base=int(tokens[pos_index]) 
     base_bin=base/binsize 
     bins=[base_bin-1,base_bin,base_bin+1] 
     tf_bind=0

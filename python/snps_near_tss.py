@@ -28,7 +28,7 @@ def main():
                 tss_pos[chrom]=dict() 
             if cur_bin not in tss_pos[chrom]: 
                 tss_pos[chrom][cur_bin]=dict() 
-            tss_pos[chrom][cur_bin][pos]=[line[1],line[5],line[7],line[9]]
+            tss_pos[chrom][cur_bin][pos]=[line[0],line[1],line[5],line[6],line[7],line[8],line[9]]
     #print "tss_pos:"+str(tss_pos) 
     print "Built dictionary of transcription start sites" 
     #curl=0 

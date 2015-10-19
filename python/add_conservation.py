@@ -44,13 +44,18 @@ while '' in data:
     data.remove('') 
 outf=open('/users/annashch/vcfchunks/CONSERVED.MAF.DNAse.TF.splice.full','w')
 header=data[0] 
+header_parts=header.split('\t') 
+chrom_index=header_parts.index("CHROM") 
+pos_index=header_parts.index("POS") 
+ref_index=header_parts.index("REF") 
+alt_index=header_parts.index("ALT") 
 outf.write('CADD\tPhylop\t'+header+'\n')
 for line in data[1::]: 
     tokens=line.split('\t') 
-    chrom=tokens[9]
-    pos=tokens[10]
-    ref=tokens[12] 
-    alt=tokens[13] 
+    chrom=tokens[chrom_index]
+    pos=tokens[pos_index]
+    ref=tokens[ref_index] 
+    alt=tokens[alt_index] 
 
     #print "chrom:"+str(chrom) 
     #print "pos:"+str(pos) 

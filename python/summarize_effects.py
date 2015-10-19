@@ -3,7 +3,8 @@ from helpers import *
 #start_pos=int(sys.argv[1]) 
 #end_pos=int(sys.argv[2]) 
 #GROUP BY MAF & PROPORTION OF FAMILY EFFECT  > POPULATION  
-data=open('/users/annashch/vcfchunks/NOMAJOR.motifs.CONSERVED.MAF.DNAse.TF.splice.full','r').read().split('\n') 
+#data=open('/users/annashch/vcfchunks/NOMAJOR.motifs.CONSERVED.MAF.DNAse.TF.splice.full','r').read().split('\n') 
+data=open('/users/annashch/vcfchunks/motifs.CONSERVED.MAF.DNAse.TF.splice.full','r').read().split('\n') 
 #data=open('NOMAJOR.motifs.CONSERVED.MAF.DNAse.TF.splice.full','r').read().split('\n')
 
 while '' in data: 
@@ -12,9 +13,22 @@ print "Read in source data"
 #BUILD SUMMARY DICTIONARIES OF WHICH SNPs SATISFY WHICH REQUIREMENTS
 
 terms=['dnase','tf','splice50','splice30','tss','phylop1','phylop2','cadd10','motif']
+header=data[0].split('\t') 
+motif_index=header.index("MOTIF") 
+phylop_index=header.index("Phylop") 
+cadd_index=header.index("CADD") 
+maf_index=header.index("MAF") 
+dnase_index=header.index("DNAse") 
+tf_index=header.index("TF") 
+splice_index=header.index("SpliceDistance") 
+rsquare_pop_index=header.index("Rsquare>Population") 
+beta_pop_index=header.index("BETA>Population") 
+tss_index=header.index("TSS") 
+
+
 special=build_categories(terms)
 for key in special:
-    for binnum in range(7):
+    for binnum in range(5):
         special[key][binnum]=[0,0]
 print "set up summary dict"
 
@@ -25,30 +39,30 @@ for line in data[1::]:
     if cl%10000==0: 
         print str(cl) 
     tokens=line.split('\t') 
-    motif=int(tokens[0])
-    cadd=tokens[1]
+    motif=int(tokens[motif_index])
+    cadd=tokens[cadd_index]
     if cadd=="NA":
         cadd=float("-inf")
     else:
-        cadd=float(tokens[1])
-    phylop=tokens[2]
+        cadd=float(tokens[cadd_index])
+    phylop=tokens[phylop_index]
     if phylop=="NA":
         phylop=float("-inf")
     else: 
-        phylop=float(tokens[2]) 
-    maf=tokens[3] 
+        phylop=float(tokens[phylop_index]) 
+    maf=tokens[maf_index] 
     maf_bin=get_maf_bin(maf) 
-    dnase=int(tokens[4]) 
-    tf=int(tokens[5]) 
-    splice_dist=tokens[6] 
+    dnase=int(tokens[dnase_index]) 
+    tf=int(tokens[tf_index]) 
+    splice_dist=tokens[splice_index] 
     if splice_dist=="inf": 
         splice_dist=float("inf") 
     else: 
         splice_dist=float(splice_dist) 
-    tss_dist=int(tokens[11])
+    tss_dist=int(tokens[tss_index])
     
-    beta_pop=float(tokens[10]) 
-    if beta_pop > beta_pop_cutoff: 
+    beta_pop=float(tokens[rsquare_pop_index]) 
+    if beta_pop >= beta_pop_cutoff: 
         beta_add=1
     else: 
         beta_add=0 
@@ -84,24 +98,32 @@ for line in data[1::]:
             special[key][maf_bin][1]+=1
 #print str(special) 
 print "writing output file:"
-outf=open('/users/annashch/summary/summary.tsv','w')
-#outf=open('summary.tsv','w') 
-outf.write('Factor1\tFactor2\tFactor3\tFactor4\tFactor5\tFactor6\tFactor7\tFactor8\tFactor9\tMAF_0_.05\tMAF_.05_.10\tMAF_.10_.15\tMAF_.15_.20\tMAF.20_\tMAF_NA\n')
+outf=open('/users/annashch/summary/summary_rsquare.tsv','w')
+categories=['dnase','tf','splice50','splice30','tss','phylop1','phylop2','cadd10','motif']
+categories.sort() 
+header='NumAnnotations\t'+'\t'.join(categories) +'\tMAF<0.01_Total\tMAF<0.01_Sig\tMAF<0.01_Prop\tMAF_0.01_0.05_Total\tMAF_0.01_0.05_Sig\tMAF_0.01_0.05_Prop\t'
+header=header+'MAF_0.05_0.20_Total\tMAF_0.05_0.20_Sig\tMAF_0.05_0.20_Prop\t'
+header=header+'MAF_>0.20_Total\tMAF_>0.20_Sig\tMAF_>0.20_Prop\t'
+header=header+'MAF_NA_Total\tMAF_NA_Sig\tMAF_NA_Prop\t'
+outf.write(header+'\n') 
 
 #SUMMARIZE THE RESULTS!
 for key in special:
-    #key=list(key)
-    for i in range(9):
-        if i<len(key):
-            outf.write(key[i]+'\t')
-        else:
-            outf.write('\t') 
-    for binval in range(7):
-        if special[key][binval][1]==0:
-            fract="NA"
-            outf.write('\tNA')
+    #print str(key) 
+    numentries=len(key) 
+    outf.write(str(numentries)) 
+    for c in categories: 
+        if c in key: 
+            outf.write('\t1') 
         else: 
-            fract=special[key][binval][0]/float(special[key][binval][1])
-            outf.write('\t'+str(round(fract,3)))
+            outf.write('\t0') 
+    for binval in range(5):
+        totalval=special[key][binval][1] 
+        sigval=special[key][binval][0] 
+        if totalval==0: 
+            prop=0
+        else: 
+            prop=float(sigval)/totalval 
+        outf.write('\t'+str(totalval)+'\t'+str(sigval)+'\t'+str(prop))
     outf.write('\n')
     

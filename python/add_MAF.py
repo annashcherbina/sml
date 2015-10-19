@@ -22,13 +22,14 @@ data=open('/users/annashch/vcfchunks/DNAse.TF.splice.full','r').read().split('\n
 while '' in data: 
     data.remove('') 
 header=data[0]
+header_parts=header.split('\t') 
+chrom_index=header_parts.index("CHROM") 
+pos_index=header_parts.index("POS") 
 outf.write("MAF\t"+header+'\n') 
-for line in data: 
+for line in data[1::]: 
     tokens=line.split('\t') 
-    chrom=tokens[8] 
-    pos=tokens[9] 
-    #print "chrom:"+str(chrom) 
-    #print "pos:"+str(pos) 
+    chrom=tokens[chrom_index] 
+    pos=tokens[pos_index] 
     if chrom in maf_dict: 
         if pos in maf_dict[chrom]: 
             outf.write(maf_dict[chrom][pos]+'\t'+line+'\n') 

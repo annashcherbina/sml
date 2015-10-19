@@ -1,15 +1,17 @@
 def get_maf_bin(maf): 
     if maf=="NA": 
-        return 6 
+        return 4 
     else:
         maf=float(maf) 
         maf=min(maf,1-maf)#sometimes the minor allele is reference, and sometimes alternate
         if maf  < 0.01: 
             return 0
-        elif maf > 0.20:
-            return 6
+        elif maf < 0.05: 
+            return 1 
+        elif maf < 0.2: 
+            return 2
         else: 
-            return 1+int(maf/0.05) 
+            return 3 
 
 def build_categories(terms):
     term_dict=dict()

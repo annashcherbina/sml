@@ -5,19 +5,29 @@ while '' in data:
     data.remove('') 
 
 header=data[0] 
+header_parts=header.split('\t') 
+maf_index=header_parts.index("MAF") 
+sum_index=header_parts.index("SubjectWithVar") 
 outf.write(header+'\n') 
 for line in data[1::]: 
     tokens=line.split('\t') 
-    if len(tokens)<38: 
+    if len(tokens)<(sum_index+1): 
         print str(tokens) 
         continue 
-    maf=tokens[3] 
-    subjects_with_alt=int(tokens[37]) 
-    if (maf=="NA") and (subjects_with_alt > 0): 
-        outf.write(line+'\n')
-    elif (maf < 0.5) and (subjects_with_alt >0): 
-        outf.write(line+'\n') 
-    else: 
-        # THE ALTERNATIVE ALLELE IS THE MAJOR ALLELE! 
-        if (subjects_with_alt < 17): #NOT EVERYONE HAS THE MAJOR ALLELE! 
+    maf=tokens[maf_index] 
+    subjects_with_alt=int(tokens[sum_index]) 
+    print "maf:"+str(maf) 
+    print "subjects_with_alt:"+str(subjects_with_alt) 
+    if maf=="NA": 
+        if subjects_with_alt > 0: 
             outf.write(line+'\n') 
+        else: 
+            print "skipping!" 
+    else: 
+        maf=float(maf) 
+        if (float(maf) < 0.5) and (subjects_with_alt >0): 
+            outf.write(line+'\n') 
+        elif (float(maf) > 0.5) and (subjects_with_alt < 17): 
+            outf.write(line+'\n') 
+        else: 
+            print "skipping!" 

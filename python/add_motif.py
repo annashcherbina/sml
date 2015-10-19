@@ -16,12 +16,15 @@ data=open('/users/annashch/vcfchunks/CONSERVED.MAF.DNAse.TF.splice.full','r').re
 while '' in data: 
     data.remove('') 
 header=data[0] 
+header_parts=header.split('\t') 
+chrom_index=header_parts.index("CHROM") 
+pos_index=header_parts.index("POS") 
 outf=open('/users/annashch/vcfchunks/motifs.CONSERVED.MAF.DNAse.TF.splice.full','w')
 outf.write('MOTIF\t'+header+'\n') 
 for line in data[1::]: 
     tokens=line.split('\t') 
-    chrom=tokens[11]
-    pos=tokens[12] 
+    chrom=tokens[chrom_index]
+    pos=tokens[pos_index] 
     motif=0 
     if chrom in motif_dict: 
         if pos in motif_dict[chrom]: 
